@@ -1,11 +1,18 @@
 import { AXES, tokens, type Profile } from "./model";
-export type ExportKind = "skill" | "css" | "json" | "component";
+import { tasteCardSvg } from "./tasteCard";
+export type ExportKind = "skill" | "css" | "json" | "component" | "card";
 export const EXPORTS: {
   id: ExportKind;
   label: string;
   filename: string;
   type: string;
 }[] = [
+  {
+    id: "card",
+    label: "Taste card",
+    filename: "tastecraft.svg",
+    type: "image/svg+xml",
+  },
   {
     id: "skill",
     label: "Agent skill",
@@ -58,6 +65,7 @@ export function componentExport(profile: Profile): string {
   return `import { useState } from 'react';\n\n// Standalone reference component. Requires React; no styling dependencies.\nconst styles = ${JSON.stringify(styles)};\n\nexport default function TastecraftCard() {\n  const [done, setDone] = useState(false);\n  return (\n    <section className="tastecraft-card" aria-label="Task">\n      <style>{styles}</style>\n      <h2>Make something yours.</h2>\n      <p>A small, working reference for your project's visual direction.</p>\n      <button type="button" aria-pressed={done} onClick={() => setDone(!done)}>\n        {done ? 'Completed ✓' : 'Mark complete'}\n      </button>\n    </section>\n  );\n}\n`;
 }
 export function exportContent(profile: Profile, kind: ExportKind): string {
+  if (kind === "card") return tasteCardSvg(profile);
   if (kind === "css") return cssExport(profile);
   if (kind === "skill") return skillExport(profile);
   if (kind === "component") return componentExport(profile);
@@ -69,7 +77,11 @@ export function exportContent(profile: Profile, kind: ExportKind): string {
     ) + "\n"
   );
 }
-export function downloadFile(content: string, filename: string, type: string) {
+export function downloadFile(
+  content: string | Blob,
+  filename: string,
+  type: string,
+) {
   const url = URL.createObjectURL(new Blob([content], { type }));
   const link = document.createElement("a");
   link.href = url;

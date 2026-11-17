@@ -318,15 +318,6 @@ h1 > span {
   margin: 0;
   line-height: 1.6;
 }
-.interactive-badge {
-  font-size: 8px;
-  letter-spacing: 1.2px;
-  background: #edf5ef;
-  color: #38654e;
-  padding: 7px 9px;
-  border-radius: 4px;
-  white-space: nowrap;
-}
 .comparison {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -758,25 +749,6 @@ h1 > span {
   color: var(--muted);
   margin-top: 25px;
 }
-.export-guide {
-  display: flex;
-  gap: 16px;
-  padding: 18px;
-  background: #f0f6f0;
-  border: 1px solid #dfeadf;
-  border-radius: 8px;
-}
-.export-guide > span {
-  font-size: 23px;
-}
-.export-guide p {
-  font-size: 12px;
-  line-height: 1.7;
-  margin: 0;
-}
-.export-guide strong {
-  display: block;
-}
 .export-tabs {
   display: flex;
   gap: 5px;
@@ -784,6 +756,7 @@ h1 > span {
   flex-wrap: wrap;
 }
 .export-tabs button {
+  transition: transform 0.15s;
   font-size: 11px;
   border: 1px solid var(--line);
   background: #f8faf8;
@@ -950,9 +923,6 @@ footer strong {
   }
   .refine-grid {
     gap: 20px;
-  }
-  .interactive-badge {
-    display: none;
   }
   .tabs {
     gap: 18px;
@@ -1192,13 +1162,6 @@ footer strong {
   .export-tabs button {
     padding: 9px;
     font-size: 10px;
-  }
-  .export-guide {
-    padding: 12px;
-    gap: 10px;
-  }
-  .export-guide p {
-    font-size: 11px;
   }
   .export-actions {
     gap: 8px;
@@ -1448,4 +1411,48 @@ footer strong {
   width: auto;
   height: auto;
   overflow: visible;
+}
+.taste-card-export img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #cbd8cd;
+  border-radius: 9px;
+}
+.card-name-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--ink);
+  cursor: pointer;
+}
+.card-name-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--green);
+}
+.taste-card-export p {
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--muted);
+  max-width: 620px;
+}
+.make-taste-card {
+  background: none;
+  border: 0;
+  padding: 12px 0;
+  text-align: left;
+  font: inherit;
+  font-size: 12px;
+  color: var(--green);
+  cursor: pointer;
+  min-height: 44px;
+}
+@media (max-width: 800px) {
+  .make-taste-card {
+    grid-column: 1 / -1;
+  }
 }

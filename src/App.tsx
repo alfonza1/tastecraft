@@ -18,6 +18,7 @@ import {
   serializeLibrary,
 } from "./library";
 import { useLibrary } from "./useLibrary";
+import { svgDataUrl, tasteCardPng, tasteCardSvg } from "./tasteCard";
 
 type Tab = "discover" | "refine" | "export";
 export default function App() {
@@ -44,6 +45,8 @@ export default function App() {
   const libraryDialog = useRef<HTMLDialogElement>(null);
   const [undo, setUndo] = useState<Profile[]>([]);
   const [kind, setKind] = useState<ExportKind>("skill");
+  const [includeCardName, setIncludeCardName] = useState(true);
+  const [renderingPng, setRenderingPng] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
   const input = useRef<HTMLInputElement>(null);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -55,7 +58,10 @@ export default function App() {
       .map((item) => item.axis),
   ).size;
   const selectedExport = EXPORTS.find((item) => item.id === kind)!;
-  const content = exportContent(profile, kind);
+  const content =
+    kind === "card"
+      ? tasteCardSvg(profile, includeCardName)
+      : exportContent(profile, kind);
   useEffect(() => {
     if (confirmation) libraryDialog.current?.showModal();
     else libraryDialog.current?.close();
@@ -151,7 +157,7 @@ export default function App() {
           <span className="brand-mark">
             t<span>•</span>
           </span>
-          Tastecraft<span className="version">STUDIO / 0.2</span>
+          Tastecraft<span className="version">STUDIO / 0.3</span>
         </a>
         <div className="header-actions">
           <span className="local-label">
@@ -343,7 +349,6 @@ export default function App() {
                     </h2>
                     <p>{axis.hint}</p>
                   </div>
-                  <span className="interactive-badge">LIVE PREVIEWS</span>
                 </div>
                 <div className="comparison">
                   {[0, 100].map((value, index) => (
@@ -469,15 +474,6 @@ export default function App() {
                     </p>
                   </div>
                 </div>
-                <div className="export-guide">
-                  <span>↗</span>
-                  <p>
-                    <strong>Start with the agent skill.</strong> Put it in your
-                    agent’s skills folder. Add the CSS tokens and React
-                    reference to your project. Export JSON to reopen your
-                    profile here.
-                  </p>
-                </div>
                 <div className="export-tabs" aria-label="Export formats">
                   {EXPORTS.map((item) => (
                     <button
@@ -489,24 +485,75 @@ export default function App() {
                     </button>
                   ))}
                 </div>
-                <div className="code-window">
-                  <div>
-                    <span>{selectedExport.filename}</span>
-                    <span>
-                      {new TextEncoder()
-                        .encode(content)
-                        .length.toLocaleString()}{" "}
-                      bytes
-                    </span>
+                {kind === "card" ? (
+                  <div className="taste-card-export">
+                    <img
+                      src={svgDataUrl(content)}
+                      alt={`Taste card showing ${includeCardName ? profile.name || "Untitled project" : "an unnamed direction"}. ${AXES.map((axis) => `${axis.title}: ${profile.values[axis.id]} of 100`).join(". ")}`}
+                    />
+                    <label className="card-name-toggle">
+                      <input
+                        type="checkbox"
+                        checked={includeCardName}
+                        onChange={(event) =>
+                          setIncludeCardName(event.target.checked)
+                        }
+                      />
+                      Include project name on the card
+                    </label>
+                    <p>
+                      Made from your actual design tokens. Only the visible name
+                      and style values are included—never your library or
+                      comparison history. SVG and PNG are created in this
+                      browser.
+                    </p>
                   </div>
-                  <pre
-                    tabIndex={0}
-                    aria-label={`${selectedExport.label} preview`}
-                  >
-                    {content}
-                  </pre>
-                </div>
+                ) : (
+                  <div className="code-window">
+                    <div>
+                      <span>{selectedExport.filename}</span>
+                      <span>
+                        {new TextEncoder()
+                          .encode(content)
+                          .length.toLocaleString()}{" "}
+                        bytes
+                      </span>
+                    </div>
+                    <pre
+                      tabIndex={0}
+                      aria-label={`${selectedExport.label} preview`}
+                    >
+                      {content}
+                    </pre>
+                  </div>
+                )}
                 <div className="export-actions">
+                  {kind === "card" && (
+                    <button
+                      className="primary-button"
+                      disabled={renderingPng}
+                      onClick={async () => {
+                        setRenderingPng(true);
+                        try {
+                          const png = await tasteCardPng(content);
+                          downloadFile(png, "tastecraft.png", "image/png");
+                          setMessage(
+                            "Downloaded tastecraft.png. Your card was rendered locally.",
+                          );
+                        } catch (error) {
+                          setMessage(
+                            error instanceof Error
+                              ? error.message
+                              : "PNG export failed. Download SVG instead.",
+                          );
+                        } finally {
+                          setRenderingPng(false);
+                        }
+                      }}
+                    >
+                      {renderingPng ? "Rendering PNG…" : "Download PNG ↓"}
+                    </button>
+                  )}
                   <button
                     className="primary-button"
                     onClick={() => {
@@ -584,6 +631,15 @@ export default function App() {
             </p>
             <button className="profile-export" onClick={() => setTab("export")}>
               Export your direction <span>↗</span>
+            </button>
+            <button
+              className="make-taste-card"
+              onClick={() => {
+                setKind("card");
+                setTab("export");
+              }}
+            >
+              Make a shareable taste card ↗
             </button>
             <div className="profile-tools">
               <button onClick={() => input.current?.click()}>
