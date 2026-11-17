@@ -73,6 +73,7 @@ export function choose(
   value: number | null,
 ): Profile {
   const history = [...profile.history, { axis, value }].slice(-MAX_HISTORY);
+  if (value === null) return { ...profile, history };
   const choices = history.filter(
     (item) => item.axis === axis && item.value !== null,
   );

@@ -37,6 +37,12 @@ describe("preference evidence", () => {
     expect(profile.history).toHaveLength(MAX_HISTORY);
     expect(profile.values.density).toBe(100);
   });
+  it("preserves manual refinement when a later comparison is skipped", () => {
+    const profile = choose(freshProfile(), "density", 100);
+    profile.values.density = 32;
+    expect(choose(profile, "density", null).values.density).toBe(32);
+    expect(choose(profile, "density", 0).values.density).toBe(50);
+  });
 });
 describe("profile interchange", () => {
   it("round trips exports including evidence and removes unknown fields", () => {
