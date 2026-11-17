@@ -5,7 +5,7 @@
   font-synthesis: none;
   font-weight: 400;
   --ink: #24443d;
-  --muted: #65766e;
+  --muted: #52685e;
   --line: #dce5df;
   --green: #174c47;
   --mint: #ddf0e6;
@@ -251,7 +251,7 @@ h1 > span {
   border: 0;
   border-bottom: 2px solid transparent;
   padding: 15px 0;
-  color: #6c7b73;
+  color: var(--muted);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -345,7 +345,7 @@ h1 > span {
 .option-label > span:last-child {
   margin-left: auto;
   font-size: 10px;
-  color: #7d8a82;
+  color: var(--muted);
 }
 .option-letter {
   width: 24px;
@@ -477,7 +477,7 @@ h1 > span {
 }
 .profile-axes strong {
   font-weight: 500;
-  color: #637a6b;
+  color: var(--muted);
 }
 .mini-range {
   height: 3px;
@@ -526,7 +526,7 @@ h1 > span {
   border: 0;
   padding: 4px 0;
   font-size: 11px;
-  color: #60786a;
+  color: var(--muted);
 }
 .privacy-note {
   display: flex;
@@ -535,7 +535,7 @@ h1 > span {
   margin-top: 28px;
   border-top: 1px solid var(--line);
   padding-top: 18px;
-  color: #68806e;
+  color: var(--muted);
 }
 .privacy-note p {
   font-size: 10px;
@@ -646,6 +646,7 @@ h1 > span {
 }
 .sample-task {
   display: flex;
+  min-height: 24px;
   align-items: center;
   gap: 8px;
   font-size: 10px;
@@ -737,7 +738,7 @@ h1 > span {
   font-weight: 600;
 }
 .slider-control output {
-  color: #6b8070;
+  color: var(--muted);
   font-weight: 400;
 }
 .slider-control input {
@@ -853,7 +854,7 @@ pre {
 }
 .status-message.empty {
   background: none;
-  color: #7f8b82;
+  color: var(--muted);
   padding-left: 0;
 }
 footer {
@@ -864,7 +865,7 @@ footer {
   margin: 22px 0 0;
   padding: 25px 0;
   font-size: 10px;
-  color: #748378;
+  color: var(--muted);
 }
 footer strong {
   padding: 0 6px;
