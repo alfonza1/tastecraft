@@ -64,9 +64,7 @@ test("storage errors are visible and do not prevent exporting; no external asset
     };
   });
   await page.goto("/");
-  await expect(page.getByRole("status")).toContainText(
-    "storage is unavailable",
-  );
+  await expect(page.getByRole("alert")).toContainText("storage is unavailable");
   await page.getByRole("button", { name: "Take it with you" }).click();
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download SKILL.md" }).click();
@@ -80,7 +78,7 @@ test("corrupt saved data recovers and confirmation is keyboard dismissible", asy
     localStorage.setItem("tastecraft.profile.v1", "{broken"),
   );
   await page.goto("/");
-  await expect(page.getByRole("status")).toContainText("could not be loaded");
+  await expect(page.getByRole("alert")).toContainText("could not be loaded");
   await page.getByRole("button", { name: "Start fresh", exact: true }).click();
   await expect(page.getByRole("alertdialog")).toBeVisible();
   await page.keyboard.press("Escape");

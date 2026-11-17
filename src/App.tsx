@@ -1,14 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  AXES,
-  choose,
-  freshProfile,
-  loadProfile,
-  MAX_IMPORT_BYTES,
-  parseProfile,
-  STORAGE_KEY,
-  type Profile,
-} from "./model";
+import { AXES, choose, freshProfile, type Profile } from "./model";
 import {
   downloadFile,
   EXPORTS,
@@ -16,16 +7,41 @@ import {
   type ExportKind,
 } from "./exports";
 import { Preview } from "./Preview";
+import { SettingsPreview } from "./SettingsPreview";
+import {
+  activeProfile,
+  appendProfiles,
+  importProfiles,
+  MAX_LIBRARY_BYTES,
+  MAX_PROFILES,
+  removeProfile,
+  serializeLibrary,
+} from "./library";
+import { useLibrary } from "./useLibrary";
 
 type Tab = "discover" | "refine" | "export";
 export default function App() {
-  const [initial] = useState(loadProfile);
-  const [profile, setProfile] = useState(initial.profile);
+  const { library, setLibrary, storageError, loadLatest, replaceStorage } =
+    useLibrary();
+  const latestLibrary = useRef(library);
+  latestLibrary.current = library;
+  const profile = activeProfile(library);
+  function setProfile(next: Profile) {
+    setLibrary((current) => ({
+      ...current,
+      profiles: current.profiles.map((entry) =>
+        entry.id === current.activeId ? { ...entry, profile: next } : entry,
+      ),
+    }));
+  }
   const [tab, setTab] = useState<Tab>("discover");
-  const [round, setRound] = useState(
-    initial.profile.history.length % AXES.length,
-  );
-  const [message, setMessage] = useState(initial.warning);
+  const [round, setRound] = useState(profile.history.length % AXES.length);
+  const [message, setMessage] = useState("");
+  const [previewKind, setPreviewKind] = useState("tasks");
+  const [confirmation, setConfirmation] = useState<
+    "delete" | "load" | "replace" | null
+  >(null);
+  const libraryDialog = useRef<HTMLDialogElement>(null);
   const [undo, setUndo] = useState<Profile[]>([]);
   const [kind, setKind] = useState<ExportKind>("skill");
   const [confirmReset, setConfirmReset] = useState(false);
@@ -41,20 +57,9 @@ export default function App() {
   const selectedExport = EXPORTS.find((item) => item.id === kind)!;
   const content = exportContent(profile, kind);
   useEffect(() => {
-    try {
-      localStorage.setItem(
-        STORAGE_KEY,
-        JSON.stringify({
-          ...profile,
-          name: profile.name.trim() || "Untitled project",
-        }),
-      );
-    } catch {
-      setMessage(
-        "Browser storage is unavailable or full. Export your profile before closing this tab.",
-      );
-    }
-  }, [profile]);
+    if (confirmation) libraryDialog.current?.showModal();
+    else libraryDialog.current?.close();
+  }, [confirmation]);
   useEffect(() => {
     if (confirmReset) resetDialog.current?.showModal();
     else resetDialog.current?.close();
@@ -76,13 +81,15 @@ export default function App() {
   async function importFile(file: File | undefined) {
     if (!file) return;
     try {
-      if (file.size > MAX_IMPORT_BYTES)
-        throw new Error("Profile is too large. Maximum size is 100 KB.");
-      const imported = parseProfile(await file.text());
-      update(imported);
-      setRound(imported.history.length % AXES.length);
+      if (file.size > MAX_LIBRARY_BYTES)
+        throw new Error("Import is too large. Maximum size is 1 MB.");
+      const imported = importProfiles(await file.text());
+      const next = appendProfiles(latestLibrary.current, imported);
+      setLibrary(next);
+      setUndo([]);
+      setRound(activeProfile(next).history.length % AXES.length);
       setMessage(
-        `Imported “${imported.name}”. Your previous profile is available with Undo.`,
+        `Imported ${imported.length} profile${imported.length === 1 ? "" : "s"}. Existing profiles are preserved in your library.`,
       );
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Import failed.");
@@ -95,6 +102,48 @@ export default function App() {
     setConfirmReset(false);
     setMessage("Fresh canvas. Your previous profile is available with Undo.");
   }
+  function addProfile(duplicate = false) {
+    try {
+      const next = appendProfiles(library, [
+        duplicate
+          ? { ...profile, name: `${profile.name.slice(0, 73)} (copy)` }
+          : freshProfile(),
+      ]);
+      setLibrary(next);
+      setUndo([]);
+      setRound(activeProfile(next).history.length % AXES.length);
+      setTab("refine");
+      setMessage(
+        duplicate
+          ? "Profile duplicated. Give your new direction a name."
+          : "New profile added. Your other directions are saved in the library.",
+      );
+    } catch (error) {
+      setMessage((error as Error).message);
+    }
+  }
+  function confirmLibraryAction() {
+    try {
+      if (confirmation === "delete") {
+        const next = removeProfile(library, library.activeId);
+        setLibrary(next);
+        setRound(activeProfile(next).history.length % AXES.length);
+        setMessage("Profile deleted. Your other directions are unchanged.");
+      } else if (confirmation === "load") {
+        const latest = loadLatest();
+        setRound(activeProfile(latest).history.length % AXES.length);
+        setMessage("Latest browser library loaded.");
+      } else {
+        replaceStorage();
+        setMessage("Saving this library to browser storage.");
+      }
+      setUndo([]);
+    } catch (error) {
+      setMessage((error as Error).message);
+    }
+    setConfirmation(null);
+  }
+  const LivePreview = previewKind === "tasks" ? Preview : SettingsPreview;
   return (
     <>
       <header className="masthead">
@@ -102,7 +151,7 @@ export default function App() {
           <span className="brand-mark">
             t<span>•</span>
           </span>
-          Tastecraft<span className="version">STUDIO / 0.1</span>
+          Tastecraft<span className="version">STUDIO / 0.2</span>
         </a>
         <div className="header-actions">
           <span className="local-label">
@@ -118,6 +167,9 @@ export default function App() {
         </div>
       </header>
       <main>
+        <a className="skip-link" href="#studio">
+          Skip to studio
+        </a>
         <section className="intro">
           <div>
             <p className="eyebrow">GOOD TASTE IS PERSONAL.</p>
@@ -158,7 +210,82 @@ export default function App() {
             </div>
           </div>
         </section>
-        <div className="workbench-top">
+        <section className="library-bar" aria-label="Profile library">
+          <label>
+            Profile library{" "}
+            <span>
+              {library.profiles.length} / {MAX_PROFILES}
+            </span>
+            <select
+              aria-label="Saved profile"
+              value={library.activeId}
+              onChange={(event) => {
+                const next = { ...library, activeId: event.target.value };
+                setLibrary(next);
+                setUndo([]);
+                setRound(activeProfile(next).history.length % AXES.length);
+                setMessage(
+                  "Profile switched. Each direction keeps its own choices.",
+                );
+              }}
+            >
+              {library.profiles.map((entry, index) => (
+                <option key={entry.id} value={entry.id}>
+                  {index + 1}. {entry.profile.name || "Untitled project"}
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="library-actions">
+            <button
+              onClick={() => addProfile()}
+              disabled={library.profiles.length >= MAX_PROFILES}
+            >
+              + New profile
+            </button>
+            <button
+              onClick={() => addProfile(true)}
+              disabled={library.profiles.length >= MAX_PROFILES}
+            >
+              Duplicate
+            </button>
+            <button
+              onClick={() => setConfirmation("delete")}
+              disabled={library.profiles.length === 1}
+            >
+              Delete profile
+            </button>
+            <button
+              onClick={() => {
+                downloadFile(
+                  serializeLibrary(library),
+                  "tastecraft-library.json",
+                  "application/json",
+                );
+                setMessage(
+                  "Library backup downloaded. Import it to add all profiles to any browser.",
+                );
+              }}
+            >
+              Back up library ↓
+            </button>
+          </div>
+        </section>
+        {storageError && (
+          <section className="storage-warning" role="alert">
+            <strong>Saving paused</strong>
+            <p>{storageError}</p>
+            <div className="library-actions">
+              <button onClick={() => setConfirmation("load")}>
+                Load latest library
+              </button>
+              <button onClick={() => setConfirmation("replace")}>
+                Replace browser storage
+              </button>
+            </div>
+          </section>
+        )}
+        <div className="workbench-top" id="studio" tabIndex={-1}>
           <nav className="tabs" aria-label="Studio sections">
             {(["discover", "refine", "export"] as Tab[]).map((item, index) => (
               <button
@@ -191,6 +318,18 @@ export default function App() {
         </div>
         <div className="workspace">
           <section className="main-panel">
+            {tab !== "export" && (
+              <label className="preview-picker">
+                Preview component
+                <select
+                  value={previewKind}
+                  onChange={(event) => setPreviewKind(event.target.value)}
+                >
+                  <option value="tasks">Project tasks</option>
+                  <option value="settings">Notification settings</option>
+                </select>
+              </label>
+            )}
             {tab === "discover" ? (
               <>
                 <div className="panel-heading">
@@ -218,7 +357,7 @@ export default function App() {
                         <strong>{index ? axis.high : axis.low}</strong>
                         <span>Try it ↓</span>
                       </div>
-                      <Preview
+                      <LivePreview
                         values={{ ...profile.values, [axis.id]: value }}
                         label={`Option ${index ? "B" : "A"} preview`}
                       />
@@ -312,7 +451,7 @@ export default function App() {
                       average the recorded choices for that axis.
                     </p>
                   </div>
-                  <Preview
+                  <LivePreview
                     values={profile.values}
                     label="Your refined preview"
                   />
@@ -467,7 +606,7 @@ export default function App() {
               <p>
                 No account. No API key.
                 <br />
-                Your profile stays in this browser.
+                Your library stays in this browser.
               </p>
             </div>
           </aside>
@@ -508,6 +647,45 @@ export default function App() {
           </button>
           <button className="primary-button" onClick={reset}>
             Start fresh
+          </button>
+        </div>
+      </dialog>
+      <dialog
+        ref={libraryDialog}
+        className="reset-dialog"
+        role="alertdialog"
+        aria-labelledby="library-confirm-title"
+        onCancel={() => setConfirmation(null)}
+      >
+        <h2 id="library-confirm-title">
+          {confirmation === "delete"
+            ? `Delete “${profile.name || "Untitled project"}”?`
+            : confirmation === "load"
+              ? "Load the latest library?"
+              : "Replace browser storage?"}
+        </h2>
+        <p>
+          {confirmation === "delete"
+            ? "This removes the selected profile and its comparison history. Download a backup first if you might need it. This action cannot be undone."
+            : confirmation === "load"
+              ? "This replaces the work in this tab with the library saved in your browser. Back up this tab first to keep its unsaved changes."
+              : "This replaces the browser library with all profiles currently open in this tab. Back up both tabs first if another tab has newer work."}
+        </p>
+        <div>
+          <button
+            autoFocus
+            className="secondary-button"
+            onClick={() => setConfirmation(null)}
+          >
+            Cancel
+          </button>
+          <button className="primary-button" onClick={confirmLibraryAction}>
+            Confirm{" "}
+            {confirmation === "delete"
+              ? "delete"
+              : confirmation === "load"
+                ? "load"
+                : "replace"}
           </button>
         </div>
       </dialog>
