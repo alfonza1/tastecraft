@@ -5,7 +5,8 @@ Tastecraft is a static, local-first React application. Nothing requires a server
 ```text
 Choices / manual controls / JSON import
                   ↓
-            Profile (version 1)
+       Library (version 2, up to 20 profiles)
+         Active profile (version 1)
              ↙            ↘
       localStorage      token compiler
                           ↙        ↘
@@ -15,7 +16,10 @@ Choices / manual controls / JSON import
 ## Modules
 
 - `src/model.ts`: five axes, choice aggregation, token generation, strict import parser, storage loading.
+- `src/library.ts`: bounded library schema, additive imports, v1 migration, identity-safe duplication, snapshot-checked persistence.
+- `src/useLibrary.ts`: Web Locks serialization, storage-event conflict detection, persistent error state, explicit recovery.
 - `src/Preview.tsx`: curated interactive example. Internal checkbox/note state is independent of design evidence.
+- `src/SettingsPreview.tsx`: notification-settings form with independent in-memory controls and save feedback.
 - `src/exports.ts`: deterministic CSS, skill, JSON, and standalone React output; browser file downloads.
 - `src/App.tsx`: studio navigation, profile editing, evidence capture, in-session undo, import/export feedback.
 - `src/style.css`: studio styling and token-driven preview styling. Bundled fontsource packages avoid runtime font requests.
@@ -34,6 +38,10 @@ Choices / manual controls / JSON import
 
 **Relative build paths.** Vite `base: './'` supports repository Pages URLs and nested static deployments without a router rewrite.
 
+**Non-destructive migration.** A valid v2 library takes precedence. With no v2 entry, the v1 profile seeds a library; the original entry is never modified. Parse failures open a temporary working library and pause writes. JSON exports retain the v1 profile schema. Whole-library exports use v2, and imports always append fresh identities after validating the entire file and capacity.
+
+**Cooperating-tab concurrency.** Each write acquires the origin's `tastecraft.library.v2` Web Lock, compares the current serialized storage snapshot to the last observed snapshot, then writes. An intervening write or storage event pauses persistence. Old scheduled writes are cancelled when React state changes. Recovery never silently merges: users back up their local work, then explicitly load the latest or replace stored data. Web Locks and HTTPS/localhost are required for persistence; editing/export remains usable without them. Arbitrary noncooperating scripts remain outside this concurrency guarantee.
+
 ## Validation boundaries
 
 Browser end-to-end coverage is Chromium on desktop and mobile viewport sizes. Firefox/WebKit and physical devices have not been verified in this release. The project is designed around standard browser APIs, not a browser extension.
@@ -43,7 +51,7 @@ The contrast axis changes between two curated colors; it is not a general contra
 ## Next steps
 
 1. Additional curated preview components (forms, editorial layouts, navigation) sharing the same tokens.
-2. A profile library with explicit per-project selection.
+2. Per-profile comparison history inspection and optional explicit merging between library backups.
 3. More palettes with automated contrast checks and transparent provenance.
 4. Adapter guidance for popular agent skill discovery conventions.
 5. Optional custom-component integration with a clearly isolated execution boundary.

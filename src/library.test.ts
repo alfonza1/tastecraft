@@ -24,6 +24,21 @@ function memoryStorage(initial: Record<string, string> = {}) {
   };
 }
 describe("profile library", () => {
+  it("opens an exportable session when browser storage access is denied", () => {
+    const storage = {
+      getItem: () => {
+        throw new Error("Access denied");
+      },
+      setItem: () => {
+        throw new Error("Access denied");
+      },
+    };
+    const result = readLibrary(storage);
+    expect(result.error).toContain("could not be loaded");
+    expect(
+      parseLibrary(serializeLibrary(result.library)).profiles,
+    ).toHaveLength(1);
+  });
   it("migrates a v1 profile without deleting or modifying the source", () => {
     const original = JSON.stringify(choose(freshProfile(), "corners", 100));
     const storage = memoryStorage({ [STORAGE_KEY]: original });

@@ -69,6 +69,17 @@ test("storage errors are visible and do not prevent exporting; no external asset
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download SKILL.md" }).click();
   expect((await download).suggestedFilename()).toBe("SKILL.md");
+  await page
+    .getByRole("button", { name: "+ New profile", exact: true })
+    .click();
+  await page.getByLabel("Project name").fill("Unsaved but exportable");
+  await expect(page.getByRole("alert")).toContainText("storage is unavailable");
+  const backupDownload = page.waitForEvent("download");
+  await page.getByRole("button", { name: "Back up library" }).click();
+  const backup = await backupDownload;
+  const unsaved = JSON.parse(await readFile((await backup.path())!, "utf8"));
+  expect(unsaved.profiles).toHaveLength(2);
+  expect(unsaved.profiles[1].profile.name).toBe("Unsaved but exportable");
   expect(external).toEqual([]);
 });
 test("corrupt saved data recovers and confirmation is keyboard dismissible", async ({

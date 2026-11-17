@@ -587,7 +587,7 @@ export default function App() {
             </button>
             <div className="profile-tools">
               <button onClick={() => input.current?.click()}>
-                Import profile
+                Import profile / library
               </button>
               <button onClick={() => setConfirmReset(true)}>Start fresh</button>
             </div>
