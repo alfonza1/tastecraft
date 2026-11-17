@@ -10,7 +10,7 @@ Choices / manual controls / JSON import
              ↙            ↘
       localStorage      token compiler
                           ↙        ↘
-                   live previews   four exporters
+                   live previews   file/card exporters
 ```
 
 ## Modules
@@ -21,6 +21,7 @@ Choices / manual controls / JSON import
 - `src/Preview.tsx`: curated interactive example. Internal checkbox/note state is independent of design evidence.
 - `src/SettingsPreview.tsx`: notification-settings form with independent in-memory controls and save feedback.
 - `src/exports.ts`: deterministic CSS, skill, JSON, and standalone React output; browser file downloads.
+- `src/tasteCard.ts`: self-contained escaped SVG card from active profile values; browser image decoding and Canvas PNG rendering. The card has no external fonts, images, scripts, or embedded profile library.
 - `src/App.tsx`: studio navigation, profile editing, evidence capture, in-session undo, import/export feedback.
 - `src/style.css`: studio styling and token-driven preview styling. Bundled fontsource packages avoid runtime font requests.
 

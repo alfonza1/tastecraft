@@ -4,6 +4,8 @@
 
 Compare functioning interfaces. Refine five dimensions. Keep a library of project directions, then export an agent skill, CSS tokens, a portable profile, and a standalone React component.
 
+**New in 0.3:** turn that direction into a shareable taste card. Its typography, spacing, corners, palette, and five measurements come directly from your profile. Download SVG or a 1200 × 780 PNG, entirely in your browser.
+
 [Try the studio](https://alfonza1.github.io/tastecraft/) · [Architecture](docs/architecture.md) · [Contribute](CONTRIBUTING.md)
 
 ![Tastecraft studio with two functioning design alternatives and a live preference profile](docs/screenshot-desktop.png)
@@ -27,12 +29,13 @@ Open **http://127.0.0.1:4322**. No API key, account, model download, or backend.
 2. **Make it yours.** Name the project and adjust any dimension. The preview updates immediately.
 3. **Take it with you.** Download the files your workflow needs:
 
-| Output               | Use it for                                                               |
-| -------------------- | ------------------------------------------------------------------------ |
-| `SKILL.md`           | Project-specific guidance for a coding agent that supports skills        |
-| `tastecraft.css`     | Concrete CSS custom properties, including reduced-motion overrides       |
-| `tastecraft.json`    | Portable profile, values, and comparison evidence; import it to continue |
-| `TastecraftCard.tsx` | A self-contained, interactive React reference with its styling included  |
+| Output                    | Use it for                                                                       |
+| ------------------------- | -------------------------------------------------------------------------------- |
+| `SKILL.md`                | Project-specific guidance for a coding agent that supports skills                |
+| `tastecraft.css`          | Concrete CSS custom properties, including reduced-motion overrides               |
+| `tastecraft.json`         | Portable profile, values, and comparison evidence; import it to continue         |
+| `TastecraftCard.tsx`      | A self-contained, interactive React reference with its styling included          |
+| `tastecraft.svg` / `.png` | A designed visual direction card for a README, design discussion, or social post |
 
 For a typical agent skill directory, place the exported `SKILL.md` in `.agents/skills/project-design/`. Skill discovery paths vary by agent; follow your agent's documentation. The file is plain Markdown and can also be supplied directly as project context.
 
@@ -58,7 +61,7 @@ Use the CSS variables in your own components:
 - Transparent preference aggregation: each non-skipped choice is 0 or 100; the retained choices on that axis are averaged. Conflicting choices move toward the middle.
 - Manual refinement, up to 30 in-session undo snapshots for choices/reset, and a confirmed fresh start.
 - Up to 20 named profiles: create, duplicate, switch, rename, and confirm deletion. Each retains its own values and comparison evidence.
-- Whole-library JSON backups, non-destructive validated imports, and four individual profile exports.
+- Whole-library JSON backups, non-destructive validated imports, four individual profile exports, and SVG/PNG taste cards.
 - Safe migration from version 0.1, cross-tab conflict detection, and persistent storage-error feedback.
 - Responsive layout, keyboard focus, reduced-motion support, and a native confirmation dialog.
 - Bundled fonts. No analytics or outbound model calls. Hosting providers still receive ordinary page requests.
@@ -105,3 +108,11 @@ Design instructions are more useful when they include choices and working exampl
 Useful future contributions: additional preview components, documented contrast-tested palettes, richer profile formats, and accessibility improvements. See [the roadmap](docs/architecture.md#next-steps).
 
 MIT licensed. Font packages retain their respective SIL Open Font Licenses.
+
+## Share your direction
+
+Choose **Make a shareable taste card** or open **Take it with you → Taste card**. The preview updates from the active profile. Uncheck **Include project name** before downloading if you want a nameless card. The card contains the displayed style values and optional name, never comparison history or other profiles. Export does not upload anything or post on your behalf.
+
+![A real PNG exported by Tastecraft, showing an editorial project direction and five style measurements](docs/taste-card.png)
+
+SVG remains editable and uses system fonts; rendering can vary by platform. PNG captures the current browser rendering at 1200 × 780. Long names wrap and may truncate in the visible title, while the SVG's accessible title retains the name. Motion appears as a numeric duration, because this is a static image. Cards are for communicating direction; use JSON to restore editable profiles.

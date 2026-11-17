@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 — 2026-11-17
+
+- Added designed, shareable taste cards derived from real profile tokens and all five style values.
+- Added self-contained SVG and locally rendered 1200 × 780 PNG downloads, with optional project-name inclusion.
+- Added accessible card descriptions, XML escaping, Unicode-safe title wrapping, and a clear SVG fallback when PNG rendering fails.
+- Removed the redundant live-preview badge and export instruction box to keep the working interface focused.
+- Added image/export regression tests, real exported examples, and desktop/mobile export screenshots.
+
 ## 0.2.1 — 2026-11-17
 
 - Restricted Pages pushes to branches and isolated deployment concurrency by ref. Creating a release tag can no longer cancel a pending studio deployment.

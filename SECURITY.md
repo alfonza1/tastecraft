@@ -6,6 +6,8 @@ Imports are versioned JSON, capped at 100 KB per individual profile and 1 MB per
 
 Library writes use the same-origin Web Locks API and compare the saved snapshot before writing. Unexpected changes pause saving; recovery actions require explicit confirmation. This protects against cooperating Tastecraft tabs, not malicious same-origin scripts or browser extensions. Backups remain the durable recovery mechanism. The old version 1 storage entry is retained during migration.
 
-Use GitHub's private vulnerability reporting on this repository when available. Do not post exploit details or private data in a public issue. Supported security fixes target the latest 0.2.x release.
+Use GitHub's private vulnerability reporting on this repository when available. Do not post exploit details or private data in a public issue. Supported security fixes target the latest 0.3.x release.
+
+Taste cards escape project names as XML text and omit library/history data. The optional name is included in both visible and accessible SVG text; turn it off before sharing if private. Cards contain only local drawing primitives and system-font references. PNG is rasterized locally using Canvas. No export action uploads or publishes files.
 
 The development server binds to 127.0.0.1. Do not expose it to an untrusted network. Build and serve `dist/` for deployment.
