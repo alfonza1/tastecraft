@@ -1,6 +1,6 @@
 {
   "name": "tastecraft",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "type": "module",
   "description": "Turn visual choices into portable design tokens and agent skills.",

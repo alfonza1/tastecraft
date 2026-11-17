@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1 — 2026-11-17
+
+- Restricted Pages pushes to branches and isolated deployment concurrency by ref. Creating a release tag can no longer cancel a pending studio deployment.
+
 ## 0.2.0 — 2026-11-17
 
 - Added a library of up to 20 named directions with independent settings/evidence, switching, duplication, and confirmed deletion.
