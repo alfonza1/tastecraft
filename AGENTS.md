@@ -46,14 +46,13 @@ the user didn't ask — then proceed with a sensible default rather than blockin
 
 ## Follow Clean Code best practices
 
-Write code in the spirit of Robert C. "Uncle Bob" Martin's *Clean Code*.
+Write code in the spirit of Robert C. "Uncle Bob" Martin's _Clean Code_.
 
 - Intention-revealing names; no magic numbers — name the constant.
 - Small functions that do one thing at a single level of abstraction.
-- Prefer self-explanatory code over comments; when you do comment, explain the *why*,
-  not the *what*.
+- Prefer self-explanatory code over comments; when you do comment, explain the _why_,
+  not the _what_.
 - DRY — extract real duplication, but don't over-abstract before a second use exists.
 - Keep side effects obvious and localized; functions should hold no surprises.
 - Leave each file cleaner than you found it (the Boy Scout Rule), matching the
   surrounding style.
-

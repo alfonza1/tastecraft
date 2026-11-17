@@ -27,26 +27,28 @@ Open **http://127.0.0.1:4322**. No API key, account, model download, or backend.
 2. **Make it yours.** Name the project and adjust any dimension. The preview updates immediately.
 3. **Take it with you.** Download the files your workflow needs:
 
-| Output | Use it for |
-| --- | --- |
-| `SKILL.md` | Project-specific guidance for a coding agent that supports skills |
-| `tastecraft.css` | Concrete CSS custom properties, including reduced-motion overrides |
-| `tastecraft.json` | Portable profile, values, and comparison evidence; import it to continue |
-| `TastecraftCard.tsx` | A self-contained, interactive React reference with its styling included |
+| Output               | Use it for                                                               |
+| -------------------- | ------------------------------------------------------------------------ |
+| `SKILL.md`           | Project-specific guidance for a coding agent that supports skills        |
+| `tastecraft.css`     | Concrete CSS custom properties, including reduced-motion overrides       |
+| `tastecraft.json`    | Portable profile, values, and comparison evidence; import it to continue |
+| `TastecraftCard.tsx` | A self-contained, interactive React reference with its styling included  |
 
 For a typical agent skill directory, place the exported `SKILL.md` in `.agents/skills/project-design/`. Skill discovery paths vary by agent; follow your agent's documentation. The file is plain Markdown and can also be supplied directly as project context.
 
 Use the CSS variables in your own components:
 
 ```css
-@import './tastecraft.css';
+@import "./tastecraft.css";
 .project-card {
   padding: var(--tc-space);
   border-radius: var(--tc-radius);
   font-family: var(--tc-font-body);
   color: var(--tc-text);
 }
-.project-card h2 { font-family: var(--tc-font-heading); }
+.project-card h2 {
+  font-family: var(--tc-font-heading);
+}
 ```
 
 ## What the first release does
